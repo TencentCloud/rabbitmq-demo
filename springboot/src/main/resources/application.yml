@@ -1,0 +1,45 @@
+spring:
+  rabbitmq: # RabbitMQ 的连接配置
+    host: 123.45.67.89  # 服务器 IP 或域名
+    port: 5672  # 端口号
+    username: admin  # 用户名
+    password: password  # 密码
+demo:
+  exchange: # 示例程序中所用交换机及队列的名称，一般不用修改
+    direct:
+      exchange: demo.exchange.direct  # Direct 交换机名称
+      bindings: # Direct 交换机要绑定到的队列，冒号前是 routing key，冒号后是队列名称
+        alice: demo.exchange.alice
+        bob: demo.exchange.bob
+        carol: demo.exchange.carol
+        dan: demo.exchange.dan
+        eve: demo.exchange.eve
+    fanout:
+      exchange: demo.exchange.fanout  # Fanout 交换机名称
+      queues: # Fanout 交换机要绑定的队列
+        - demo.exchange.alice
+        - demo.exchange.bob
+        - demo.exchange.carol
+        - demo.exchange.dan
+        - demo.exchange.eve
+    topic:
+      exchange: demo.exchange.topic  # Topic 交换机名称
+      pattern: demo.exchange.*.e  # 绑定队列所使用的 binding key；交换机收到消息时，会把 routing key 能匹配上的消息发到队列里
+      routingKeyToSend: # 模拟发送消息到交换机时，要使用哪些 routing key 发送
+        - demo.exchange.alice.e
+        - demo.exchange.bob.b
+        - demo.exchange.carol.l
+        - demo.exchange.dan.n
+        - demo.exchange.eve.e
+      queue: demo.exchange.topic  # 用于接收消息的队列
+  delayed:
+    pending-queue-ttl: demo.delayed.pending.ttl  # 延时队列的名称，统一设定延时时间
+    pending-queue-ttl-ms: 1000  # 队列上设定的延时时间
+    pending-queue-nottl: demo.delayed.pending.nottl  # 延时队列的名称，队列上不设定延时时间，而是在消息上设置
+    exchange-x-delayed-message: demo.delayed.pending.exchange  # 延时交换机的名称
+    delayed-queue: demo.delayed.delayed-queue  # 延时结束后，消息最终到达的队列的名称
+  reply:
+    entrance: demo.reply.entrance  # 消息先到达的队列的名称
+    exit: demo.reply.exit  # 消息转发到的队列的名称
+  pub-confirm:
+    queue: demo.pubconfirm.queue  # 队列名称

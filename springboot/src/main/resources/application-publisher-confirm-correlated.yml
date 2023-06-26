@@ -1,0 +1,6 @@
+spring: # 这里是用于支持发送确认（pubconfirm 包）演示程序的配置项，正常演示的情况下不需要修改
+  rabbitmq:
+    publisher-confirm-type: correlated  # 发布确认的类型；使用 simple 也可开启发布确认（等效于 waitConfirms）
+    publisher-returns: true  # 启用发布者返回，这样一来发送失败（未到达任何队列）的消息会被返回到注册的回调函数
+    template:
+      mandatory: true  # 将 Template 发送的消息都设定为 mandatory，即必须送达，不能送达时触发发布者返回

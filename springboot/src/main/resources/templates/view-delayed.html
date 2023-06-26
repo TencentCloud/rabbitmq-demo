@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <script th:inline="javascript">
+    function sendButtonClickHandler(button, actionUrl, bodySupplier) {
+      return function () {
+        button.enabled = false
+        let originalText = button.innerText
+        button.innerText = 'Sending'
+
+        let requestInit = {method: 'POST'}
+        if (bodySupplier) {
+          requestInit = {
+            body: bodySupplier(),
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            ...requestInit
+          }
+        }
+
+        fetch(actionUrl, requestInit).then(resp => {
+          if (resp.status !== 200) {
+            throw resp.status
+          }
+          return resp.json()
+        }).then(json => {
+          if (confirm('发送成功\n\n' + json.map(s => '* ' + s).join('\n') + '\n\n是否刷新页面？')) {
+            location.reload()
+          }
+        }).catch(() => {
+          console.log(arguments)
+          alert('发送失败')
+        }).finally(() => {
+          button.innerText = originalText
+          button.enabled = true
+        });
+      }
+    }
+
+    function bindClickEventForSendButton(button, actionUrl, bodySupplier) {
+      button.addEventListener('click', sendButtonClickHandler(button, actionUrl, bodySupplier))
+    }
+
+    addEventListener('load', function () {
+      let ttlSupplier = function () {
+        let output = new URLSearchParams()
+        output.append('ttl', parseInt(document.getElementById('ttl').value).toString())
+        console.log(output)
+        return output
+      }
+
+      bindClickEventForSendButton(document.getElementById('send-ttl'), '/delayed/queueTTL/send')
+      bindClickEventForSendButton(document.getElementById('send-nottl'), '/delayed/queueNoTTL/send',
+          ttlSupplier)
+      bindClickEventForSendButton(document.getElementById('send-exchange'),
+          '/delayed/exchange/send', ttlSupplier)
+    })
+  </script>
+</head>
+<body>
+<p>刷新以获得最新消息</p>
+<label for="ttl">延时毫秒数：</label>
+<input type="number" id="ttl" placeholder="延时毫秒数" value="1000"/>
+<br/>
+<button type="button" id="send-ttl">发送消息到延时队列（固定时长）</button>
+<button type="button" id="send-nottl">发送消息到延时队列</button>
+<button type="button" id="send-exchange">发送消息到延时交换机</button>
+<hr/>
+<ul>
+  <li th:if="${#lists.isEmpty(messages)}">
+    没有消息
+  </li>
+  <li th:each="message : ${messages}">
+    <span th:text="${message.queue}"></span>
+    -
+    <span th:text="${message.content}"></span>
+  </li>
+</ul>
+</body>
+</html>

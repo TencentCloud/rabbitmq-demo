@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <script>
+    addEventListener('load', function () {
+      let buttonSendTopic = document.getElementById('send-topic')
+      buttonSendTopic.addEventListener('click', () => {
+        buttonSendTopic.enabled = false
+        let originalText = buttonSendTopic.innerText
+        buttonSendTopic.innerText = 'Sending'
+        fetch('/exchange/topic/send', {method: 'POST'}).then(resp => {
+          if (resp.status !== 200) {
+            throw resp.status
+          }
+          return resp.json()
+        }).then(json => {
+          if (confirm('发送成功\n\n' + json.map(s => '* ' + s).join('\n') + '\n\n是否刷新页面？')) {
+            location.reload()
+          }
+        }).catch(() => {
+          console.log(arguments)
+          alert('发送失败')
+        }).finally(() => {
+          buttonSendTopic.innerText = originalText
+          buttonSendTopic.enabled = true
+        });
+      })
+    })
+  </script>
+</head>
+<body>
+<p>刷新以获得最新消息</p>
+<button type="button" id="send-topic">发送消息到 Topic 交换机</button>
+<hr/>
+<p>Binding Key: <span th:text="${bindingKey}"></span></p>
+<ul>
+  <li th:if="${#lists.isEmpty(messages)}">
+    没有消息
+  </li>
+  <li th:each="message : ${messages}">
+    <span th:text="${message.queue}"></span>
+    -
+    <span th:text="${message.content}"></span>
+  </li>
+</ul>
+</body>
+</html>

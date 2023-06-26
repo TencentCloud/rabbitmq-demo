@@ -1,0 +1,14 @@
+spring:
+  rabbitmq:  # RabbitMQ 的连接信息
+    host: 10.0.0.123  # 注意这里要使用 VPC 的内网地址
+    port: 5671  # TLS 在 5671 端口下（而非 5672）
+    username: admin  # 用户名，与普通连接相同
+    password: password  # 密码，与普通连接相同
+    ssl:  # TLS 相关配置
+      enabled: true
+      key-store: classpath:rabbit-client.keycert.p12
+      key-store-password: rabbitmq
+      trust-store: classpath:rabbitStore
+      trust-store-password: rabbitmq
+      validate-server-certificate: true  # 开启服务器证书验证
+      verify-hostname: false  # 不开启主机名验证
